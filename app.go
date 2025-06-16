@@ -82,32 +82,40 @@ var (
 func (a *App) startup(ctx context.Context) {
 	a.ctx = ctx
 
+	home, err := os.UserHomeDir()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	file := filepath.Join(home, "LABOTRON", MainFile)
+	// ✅ สร้างโฟลเดอร์ถ้ายังไม่มี
+	dir := filepath.Dir(file)
+	if err := os.MkdirAll(dir, 0755); err != nil {
+		log.Fatal("failed to create folder:", err)
+	}
 	// ตรวจสอบว่าไฟล์มีอยู่หรือไม่
-	if _, err := os.Stat(MainFile); os.IsNotExist(err) {
+	if _, err := os.Stat(file); os.IsNotExist(err) {
 		fmt.Println("Main file not found. Cloning from embed...")
 
 		// อ่านไฟล์จาก embed
 		data, err := fs.ReadFile(excel, filepath.Join("data", MainFile))
 		if err != nil {
-			fmt.Println("Failed to read embedded file:", err)
+			log.Fatal(err)
 			return
 		}
-
 		// เขียนไฟล์ไปยังไฟล์จริง
-		err = os.WriteFile(MainFile, data, 0644)
+		err = os.WriteFile(file, data, 0644)
 		if err != nil {
-			fmt.Println("Failed to write file to disk:", err)
+			log.Fatal(err)
 			return
 		}
+		log.Println("success")
 
-		fmt.Println("File cloned successfully.")
-	} else {
-		fmt.Println("Main file already exists.")
 	}
 
-	f, err := excelize.OpenFile(MainFile)
+	f, err := excelize.OpenFile(file)
 	if err != nil {
-		fmt.Println(err)
+		// log.Fatal(err)
 		return
 	}
 	defer f.Close()
