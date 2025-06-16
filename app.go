@@ -16,7 +16,6 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/wailsapp/wails/v2/pkg/runtime"
-	"github.com/xuri/excelize/v2"
 	"go.bug.st/serial"
 )
 
@@ -113,32 +112,10 @@ func (a *App) startup(ctx context.Context) {
 
 	}
 
-	f, err := excelize.OpenFile(file)
-	if err != nil {
-		// log.Fatal(err)
-		return
-	}
-	defer f.Close()
-
-	// check the data sheet
-	found := false
-	for _, s := range f.GetSheetList() {
-		if s == "data" {
-			found = true
-			break
-		}
-	}
-	fmt.Println("found", found)
-	if !found {
-		if _, err := f.NewSheet("data"); err != nil {
-			log.Fatal(err)
-		}
-	}
-
 	docs := Docs{
 		result: make(chan Result),
 		ctx:    ctx,
-		f:      f,
+		file:   file,
 	}
 
 	a.docs = &docs
