@@ -3,15 +3,11 @@ package main
 import (
 	"bytes"
 	"context"
-	"embed"
 	"encoding/binary"
 	"encoding/hex"
 	"fmt"
-	"io/fs"
 	"log"
 	"math"
-	"os"
-	"path/filepath"
 	"strings"
 
 	"github.com/google/uuid"
@@ -34,10 +30,10 @@ type App struct {
 	unselectMonitor chan uuid.UUID
 	message         chan []byte
 	result          chan []float32
-	docs            *Docs
+	measurement     *MeasurementService
 }
 
-func NewApp() *App {
+func NewApp(measurement *MeasurementService) *App {
 
 	return &App{
 		monitors:        make(map[uuid.UUID]*Monitor),
@@ -45,6 +41,7 @@ func NewApp() *App {
 		unselectMonitor: make(chan uuid.UUID),
 		message:         make(chan []byte),
 		result:          make(chan []float32),
+		measurement:     measurement,
 	}
 }
 
@@ -72,54 +69,12 @@ func hexToFloat(dataPipe []string) []float32 {
 	return result
 }
 
-//go:embed all:data
-var excel embed.FS
-var (
-	MainFile = "BSM370 Conputer Interface.xlsx"
-)
-
 func (a *App) startup(ctx context.Context) {
 	a.ctx = ctx
+	measurement := MeasurementService{}
 
-	home, err := os.UserHomeDir()
-	if err != nil {
-		log.Fatal(err)
-	}
+	measurement.start(ctx)
 
-	file := filepath.Join(home, "LABOTRON", MainFile)
-	// ✅ สร้างโฟลเดอร์ถ้ายังไม่มี
-	dir := filepath.Dir(file)
-	if err := os.MkdirAll(dir, 0755); err != nil {
-		log.Fatal("failed to create folder:", err)
-	}
-	// ตรวจสอบว่าไฟล์มีอยู่หรือไม่
-	if _, err := os.Stat(file); os.IsNotExist(err) {
-		fmt.Println("Main file not found. Cloning from embed...")
-
-		// อ่านไฟล์จาก embed
-		data, err := fs.ReadFile(excel, filepath.Join("data", MainFile))
-		if err != nil {
-			log.Fatal(err)
-			return
-		}
-		// เขียนไฟล์ไปยังไฟล์จริง
-		err = os.WriteFile(file, data, 0644)
-		if err != nil {
-			log.Fatal(err)
-			return
-		}
-		log.Println("success")
-
-	}
-
-	docs := Docs{
-		result: make(chan Result),
-		ctx:    ctx,
-		file:   file,
-	}
-
-	a.docs = &docs
-	go docs.run()
 	for {
 		select {
 		case monitor := <-a.selectMonitor:
@@ -160,7 +115,15 @@ func (a *App) startup(ctx context.Context) {
 				Weigth: result[0],
 				BMI:    result[1],
 			}
-			a.docs.result <- res
+			measurement := Measurement{
+				Weight: res.Weigth,
+				Height: res.Height,
+				BMI:    res.BMI,
+			}
+			fmt.Println(measurement)
+			if err := a.measurement.Create(&measurement); err != nil {
+				log.Println(err)
+			}
 
 		case <-a.ctx.Done():
 			return

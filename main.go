@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"embed"
 
 	"github.com/wailsapp/wails/v2"
@@ -13,20 +14,26 @@ var assets embed.FS
 
 func main() {
 	// Create an instance of the app structure
-	app := NewApp()
-
+	measurement := NewMeasurement()
+	app := NewApp(measurement)
 	// Create application with options
 	err := wails.Run(&options.App{
-		Title:  "myproject",
-		Width:  1024,
-		Height: 768,
+		Title:         "BSM 370 Computer Interface",
+		Width:         650,
+		Height:        768,
+		DisableResize: true,
+		Fullscreen:    false,
+		Frameless:     false,
 		AssetServer: &assetserver.Options{
 			Assets: assets,
 		},
-		BackgroundColour: &options.RGBA{R: 27, G: 38, B: 54, A: 1},
-		OnStartup:        app.startup,
+		OnStartup: func(ctx context.Context) {
+			app.startup(ctx)
+			measurement.start(ctx)
+		},
 		Bind: []interface{}{
 			app,
+			measurement,
 		},
 	})
 
