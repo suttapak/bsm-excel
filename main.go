@@ -27,6 +27,7 @@ func main() {
 		log.Fatal(err)
 	}
 	app := NewApp(measurement, logger)
+	exporter := NewExporter(measurement, logger)
 	// Create application with options
 	err = wails.Run(&options.App{
 		Title:      "BSM 370 Computer Interface",
@@ -43,6 +44,8 @@ func main() {
 			logger.Debug("initial config success")
 			measurement.start(ctx)
 			logger.Debug("initial measurement service success")
+			exporter.SetContext(ctx)
+			logger.Debug("initial exporter service success")
 			app.startup(ctx, conf)
 			logger.Debug("initial application success")
 
@@ -53,6 +56,7 @@ func main() {
 		Bind: []interface{}{
 			app,
 			measurement,
+			exporter,
 		},
 		SingleInstanceLock: &options.SingleInstanceLock{
 			UniqueId:               "e3984e08-28dc-4e3d-b70a-45e961589cdc",

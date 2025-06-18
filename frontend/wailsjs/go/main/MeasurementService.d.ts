@@ -6,6 +6,8 @@ export function Create(arg1:main.Measurement):Promise<void>;
 
 export function Delete(arg1:number):Promise<void>;
 
+export function Find():Promise<Array<main.Measurement>>;
+
 export function FindAll(arg1:main.FindAllRequest):Promise<main.MeasurementResponse___main_Measurement_>;
 
 export function Update(arg1:number,arg2:main.Measurement):Promise<void>;

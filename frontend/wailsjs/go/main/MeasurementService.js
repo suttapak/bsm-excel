@@ -10,6 +10,10 @@ export function Delete(arg1) {
   return window['go']['main']['MeasurementService']['Delete'](arg1);
 }
 
+export function Find() {
+  return window['go']['main']['MeasurementService']['Find']();
+}
+
 export function FindAll(arg1) {
   return window['go']['main']['MeasurementService']['FindAll'](arg1);
 }

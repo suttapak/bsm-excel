@@ -108,6 +108,11 @@ func (m *MeasurementService) FindAll(req *FindAllRequest) (res MeasurementRespon
 	return
 }
 
+func (m *MeasurementService) Find() (res []Measurement, err error) {
+	err = m.db.Find(&res).Error
+	return
+}
+
 func ILike(column, value string) func(*gorm.DB) *gorm.DB {
 	return func(db *gorm.DB) *gorm.DB {
 		return db.Where("LOWER("+column+") LIKE LOWER(?)", "%"+value+"%")
