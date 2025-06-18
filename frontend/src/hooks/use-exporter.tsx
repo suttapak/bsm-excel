@@ -3,6 +3,6 @@ import { ExportToExcel } from "#/go/main/Exporter";
 
 export const useExporter = () => {
   return useMutation({
-    mutationFn: () => ExportToExcel(),
+    mutationFn: (condition: Date) => ExportToExcel(condition.toISOString()),
   });
 };

@@ -4,6 +4,7 @@ import (
 	"context"
 	"os"
 	"path/filepath"
+	"time"
 
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
@@ -108,8 +109,11 @@ func (m *MeasurementService) FindAll(req *FindAllRequest) (res MeasurementRespon
 	return
 }
 
-func (m *MeasurementService) Find() (res []Measurement, err error) {
-	err = m.db.Find(&res).Error
+func (m *MeasurementService) Find(date time.Time) (res []Measurement, err error) {
+	where := "created_at >= ? AND created_at < ?"
+	startOfDay := date.Truncate(24 * time.Hour)
+	endOfDay := startOfDay.Add(24 * time.Hour)
+	err = m.db.Where(where, startOfDay, endOfDay).Find(&res).Error
 	return
 }
 

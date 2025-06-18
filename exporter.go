@@ -61,8 +61,15 @@ func ensureExcelFile() error {
 	return nil
 }
 
-func (e *Exporter) ExportToExcel() error {
-	data, err := e.measurementService.Find()
+func (e *Exporter) ExportToExcel(date string) error {
+	condition := time.Now()
+	fmt.Println("Exporting to Excel with date:", date)
+	if date != "" {
+		if parseTime, err := time.Parse(time.RFC3339, date); err == nil {
+			condition = parseTime
+		}
+	}
+	data, err := e.measurementService.Find(condition)
 	if err != nil {
 		e.logger.Error("Failed to fetch measurements" + err.Error())
 		return err

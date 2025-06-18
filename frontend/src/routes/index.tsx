@@ -4,6 +4,7 @@ import { useDataStore, useFindAllMeasurement, useUpdatePatienID } from "@/hooks/
 import { formatShortDateOnly, formatShortTimeOnly } from "@/date/formater";
 import { ArrowRight } from "lucide-react";
 import { useExporter } from "@/hooks/use-exporter";
+import ExportModal from "@/components/export-modal";
 export const Route = createFileRoute("/")({
   component: RouteComponent,
 });
@@ -13,20 +14,11 @@ function RouteComponent() {
   const { setPage, setSort, sort, sort_by, search } = useDataStore();
 
   const { mutate, isPending } = useUpdatePatienID();
-  const { mutate: exporter, isPending: isLoadingExport } = useExporter();
 
   return (
     <div className="flex flex-col gap-2">
       <div className="flex justify-end">
-        <Button
-          isDisabled={isLoadingExport}
-          isLoading={isLoadingExport}
-          onPress={() => {
-            exporter();
-          }}
-        >
-          ส่งออกข้อมูล
-        </Button>
+        <ExportModal />
       </div>
       <Table
         aria-label="ตารางข้อมูลวัดผล"
@@ -71,8 +63,8 @@ function RouteComponent() {
           {(item) => (
             <TableRow key={item.ID}>
               <TableCell>{item.ID}</TableCell>
-              <TableCell>{formatShortDateOnly(item.CreatedAt)}</TableCell>
-              <TableCell>{formatShortTimeOnly(item.CreatedAt)}</TableCell>
+              <TableCell>{formatShortDateOnly(item.CreatedAt as string)}</TableCell>
+              <TableCell>{formatShortTimeOnly(item.CreatedAt as string)}</TableCell>
               <TableCell>
                 <Input
                   onValueChange={(value) => mutate({ id: item.ID, pId: value.trim() })}

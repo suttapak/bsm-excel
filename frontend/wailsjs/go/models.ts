@@ -50,10 +50,8 @@ export namespace main {
 	}
 	export class Measurement {
 	    ID: number;
-	    // Go type: time
-	    CreatedAt: any;
-	    // Go type: time
-	    UpdatedAt: any;
+	    CreatedAt: time.Time;
+	    UpdatedAt: time.Time;
 	    // Go type: gorm
 	    DeletedAt: any;
 	    full_name: string;
@@ -69,8 +67,8 @@ export namespace main {
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.ID = source["ID"];
-	        this.CreatedAt = this.convertValues(source["CreatedAt"], null);
-	        this.UpdatedAt = this.convertValues(source["UpdatedAt"], null);
+	        this.CreatedAt = this.convertValues(source["CreatedAt"], time.Time);
+	        this.UpdatedAt = this.convertValues(source["UpdatedAt"], time.Time);
 	        this.DeletedAt = this.convertValues(source["DeletedAt"], null);
 	        this.full_name = source["full_name"];
 	        this.patient_id = source["patient_id"];
@@ -141,6 +139,23 @@ export namespace main {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.id = source["id"];
 	        this.port = source["port"];
+	    }
+	}
+
+}
+
+export namespace time {
+	
+	export class Time {
+	
+	
+	    static createFrom(source: any = {}) {
+	        return new Time(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	
 	    }
 	}
 
