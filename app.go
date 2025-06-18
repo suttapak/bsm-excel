@@ -5,6 +5,8 @@ import (
 	"context"
 	"encoding/binary"
 	"encoding/hex"
+	"errors"
+	"fmt"
 	"math"
 	"strings"
 
@@ -103,8 +105,10 @@ func (a *App) startup(ctx context.Context, conf *Config) {
 			a.logger.Debug("result: " + strings.Join(dataPipe[:6], ", "))
 
 			a.result <- result
+			a.logger.Debug("result sent to channel")
 
 		case result := <-a.result:
+			a.logger.Debug("result received: " + strings.Join(strings.Split(fmt.Sprintf("%v", result), " "), ", "))
 			runtime.EventsEmit(a.ctx, "result", result)
 			res := Result{
 				Height: result[3],
@@ -116,9 +120,11 @@ func (a *App) startup(ctx context.Context, conf *Config) {
 				Height: res.Height,
 				BMI:    res.BMI,
 			}
+			a.logger.Debug("measurement: " + fmt.Sprintf("%+v", measurement))
 			if err := a.measurement.Create(&measurement); err != nil {
 				a.logger.Error(err)
 			}
+			a.logger.Debug("measurement saved to database")
 
 		case <-a.ctx.Done():
 			return
@@ -135,10 +141,11 @@ func (a *App) GetMonitors() ([]Monitor, error) {
 
 }
 
-func (a *App) SelectMonitor(port string) {
+func (a *App) SelectMonitor(port string) error {
 	ports, err := serial.GetPortsList()
 	if err != nil {
 		a.logger.Error("failed to get serial ports: " + err.Error())
+		return err
 	}
 	// Check if the port is valid
 	validPort := false
@@ -148,7 +155,7 @@ func (a *App) SelectMonitor(port string) {
 			break
 		}
 	}
-	if validPort {
+	if !validPort {
 		a.config.PORT = ""
 		viper.Set("PORT", "")
 		if err := viper.WriteConfig(); err != nil {
@@ -156,7 +163,7 @@ func (a *App) SelectMonitor(port string) {
 		}
 		a.logger.Error("invalid serial port: " + port)
 
-		return
+		return errors.New("invalid serial port: " + port)
 	}
 	ctx, cancel := context.WithCancel(a.ctx)
 	mode := serial.Mode{
@@ -174,6 +181,7 @@ func (a *App) SelectMonitor(port string) {
 	}
 	a.selectMonitor <- monitor
 	a.monitors[monitor.ID] = monitor
+	return nil
 }
 
 func (a *App) UnselectMonitor(id uuid.UUID) {

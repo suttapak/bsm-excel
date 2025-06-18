@@ -1,39 +1,27 @@
-import { useGetPorts } from "@/hooks/use-setting";
-import { Alert, Button, Card, CardBody, CardHeader, Select, SelectItem, Skeleton, Tooltip } from "@heroui/react";
+import { useGetMonitors } from "@/hooks/use-setting";
 import { createFileRoute } from "@tanstack/react-router";
-import { RefreshCw } from "lucide-react";
-import { useMemo } from "react";
+
+import PortSelection from "@/components/port-selection";
+import { Card, CardBody, CardHeader, Listbox, ListboxItem, Skeleton } from "@heroui/react";
 
 export const Route = createFileRoute("/setting")({
   component: RouteComponent,
 });
 
 function RouteComponent() {
-  const { data, isLoading, isError, refetch } = useGetPorts();
-  const ports = useMemo(() => {
-    return data?.map((data) => ({
-      port: data,
-    }));
-  }, [data]);
+  const { data, isLoading, isError } = useGetMonitors();
   return (
     <div className="flex flex-col gap-2">
+      <PortSelection />
       <Card>
-        <CardHeader className="flex flex-row gap-2 justify-between">
-          <span>พอร์ตการเชื่อมต่อ</span>
-          <Tooltip content={"รีโหลด"}>
-            <Button onPress={() => refetch()} size="sm" isIconOnly>
-              <RefreshCw size={18} />
-            </Button>
-          </Tooltip>
-        </CardHeader>
+        <CardHeader>เครื่องที่เชื่อมต่ออยู่</CardHeader>
         <CardBody>
           {isLoading && <Skeleton className="h-14 rounded" />}
           {data && (
-            <Select items={ports} label="พอร์ตการเชื่อมต่อ" placeholder="เลือกพอร์ตการเชื่อมต่อ">
-              {(port) => <SelectItem key={port.port}>{port.port}</SelectItem>}
-            </Select>
+            <Listbox aria-label="Dynamic Actions" items={data} onAction={(key) => alert(key)}>
+              {(item) => <ListboxItem key={item.id.toString()}>{item.port}</ListboxItem>}
+            </Listbox>
           )}
-          {!isLoading && !data && <Alert color="danger">ไม่พบพอร์ตการเชื่อมต่อ</Alert>}
         </CardBody>
       </Card>
     </div>

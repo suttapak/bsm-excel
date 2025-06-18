@@ -20,8 +20,8 @@ export const useFindAllMeasurement = () => {
         sort: sort,
         sort_by: sort_by,
       }),
-    // refetchInterval: 1000, // ⏱️ every 1000ms = 1 second
-    // refetchIntervalInBackground: true, // optional: continue in background tab
+    refetchInterval: 1000, // ⏱️ every 1000ms = 1 second
+    refetchIntervalInBackground: true, // optional: continue in background tab
   });
 };
 
