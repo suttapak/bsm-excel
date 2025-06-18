@@ -1,8 +1,9 @@
 import { Providers } from "@/components/provider";
 import SidebarItem from "@/components/sidbar-item";
-import { Navbar, NavbarBrand, NavbarContent, Button, Drawer, DrawerContent, DrawerHeader, DrawerBody, DrawerFooter, useDisclosure } from "@heroui/react";
+import { useDataStore } from "@/hooks/use-data";
+import { Navbar, NavbarBrand, NavbarContent, Button, Drawer, DrawerContent, DrawerHeader, DrawerBody, DrawerFooter, useDisclosure, Input } from "@heroui/react";
 import { createRootRoute, Outlet, useLocation } from "@tanstack/react-router";
-import { Home, Link, Menu, Settings } from "lucide-react";
+import { Home, Link, Menu, Search, Settings } from "lucide-react";
 import { Fragment } from "react";
 
 export const Route = createRootRoute({
@@ -11,6 +12,7 @@ export const Route = createRootRoute({
 
 const Layout = () => {
   const { onOpen, ...modal } = useDisclosure();
+  const { setSearch } = useDataStore();
   return (
     <Providers>
       <Navbar maxWidth="full" isBordered>
@@ -20,6 +22,7 @@ const Layout = () => {
           </NavbarBrand>
         </NavbarContent>
         <NavbarContent justify="end">
+          <Input onValueChange={setSearch} isClearable placeholder="ค้นหาจาก หมายเลขประจำตัว" startContent={<Search />} />
           <Button size="sm" onPress={onOpen} isIconOnly variant="ghost" color="primary">
             <Menu size={18} />
           </Button>

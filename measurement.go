@@ -74,6 +74,10 @@ func (m *MeasurementService) Delete(id uint) error {
 	return m.db.Delete(&Measurement{}, id).Error
 }
 
+func (m *MeasurementService) UpdatePatienID(id uint, pId string) error {
+	return m.db.Model(&Measurement{}).Where("id = ?", id).Update("patient_id", pId).Error
+}
+
 func (m *MeasurementService) FindAll(req *FindAllRequest) (res MeasurementResponse[[]Measurement], err error) {
 	var (
 		count  int64 = 0
@@ -82,8 +86,7 @@ func (m *MeasurementService) FindAll(req *FindAllRequest) (res MeasurementRespon
 	)
 
 	fmt.Println("filter", filter)
-	query := m.db.Model(&Measurement{}).Count(&count)
-	filter.SetCount(count)
+	query := m.db.Model(&Measurement{})
 	if filter.Validate() {
 		fmt.Println("1")
 		query.Order(filter.OrderBy + " " + filter.Order)
@@ -93,8 +96,11 @@ func (m *MeasurementService) FindAll(req *FindAllRequest) (res MeasurementRespon
 	}
 
 	if req.Search != "" {
-		query = query.Where("full_name ILIKE ? OR patient_id ILINK ?", filter.Search, filter.Search)
+		fmt.Println("4")
+		query = query.Scopes(ILike("patient_id", req.Search))
 	}
+	query = query.Count(&count)
+	filter.SetCount(count)
 
 	err = query.Offset(filter.Offset).Limit(filter.Limit).Find(&models).Error
 	res = MeasurementResponse[[]Measurement]{
@@ -102,4 +108,10 @@ func (m *MeasurementService) FindAll(req *FindAllRequest) (res MeasurementRespon
 		Meta: *filter,
 	}
 	return
+}
+
+func ILike(column, value string) func(*gorm.DB) *gorm.DB {
+	return func(db *gorm.DB) *gorm.DB {
+		return db.Where("LOWER("+column+") LIKE LOWER(?)", "%"+value+"%")
+	}
 }

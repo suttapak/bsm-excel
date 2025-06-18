@@ -19,7 +19,7 @@ func main() {
 	// Create application with options
 	err := wails.Run(&options.App{
 		Title:         "BSM 370 Computer Interface",
-		Width:         650,
+		Width:         1024,
 		Height:        768,
 		DisableResize: true,
 		Fullscreen:    false,

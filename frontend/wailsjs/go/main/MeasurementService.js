@@ -17,3 +17,7 @@ export function FindAll(arg1) {
 export function Update(arg1, arg2) {
   return window['go']['main']['MeasurementService']['Update'](arg1, arg2);
 }
+
+export function UpdatePatienID(arg1, arg2) {
+  return window['go']['main']['MeasurementService']['UpdatePatienID'](arg1, arg2);
+}

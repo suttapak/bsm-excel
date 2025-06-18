@@ -1,22 +1,22 @@
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import React from "react";
-import { FindAll } from "#/go/main/MeasurementService";
+import { FindAll, UpdatePatienID } from "#/go/main/MeasurementService";
 import { SortDescriptor } from "@heroui/react";
 import { main } from "#/go/models";
 
 export const keys = {
-  measurement: (page: number, limit: number, sort: string, sortBy: string) => ["measurement", page, limit, sort, sortBy] as const,
+  measurement: (page: number, limit: number, sort: string, sortBy: string, serach: string) => ["measurement", page, limit, sort, sortBy, serach] as const,
 };
 export const useFindAllMeasurement = () => {
-  const { page, limit, sort_by, sort } = useDataStore();
+  const { page, limit, sort_by, sort, search } = useDataStore();
 
   return useQuery({
-    queryKey: keys.measurement(page, limit, sort, sort_by),
+    queryKey: keys.measurement(page, limit, sort, sort_by, search),
     queryFn: () =>
       FindAll({
         page: page,
         limit: limit,
-        search: "",
+        search: search,
         sort: sort,
         sort_by: sort_by,
       }),
@@ -25,10 +25,20 @@ export const useFindAllMeasurement = () => {
   });
 };
 
+export const useUpdatePatienID = () => {
+  return useMutation({
+    mutationFn: (data: { id: number; pId: string }) => {
+      console.log(data);
+      return UpdatePatienID(data.id, data.pId);
+    },
+  });
+};
+
 import { create } from "zustand";
 import { immer } from "zustand/middleware/immer";
 
 type State = {
+  search: string;
   page: number;
   limit: number;
   sort: "ascending" | "descending";
@@ -39,10 +49,12 @@ type Actions = {
   setPage: (page: number) => void;
   setLimit: (limit: number) => void;
   setSort: (desc: SortDescriptor) => void;
+  setSearch: (search: string) => void;
 };
 
 export const useDataStore = create<State & Actions>()(
   immer((set) => ({
+    search: "",
     page: 0,
     limit: 0,
     sort: "descending",
@@ -53,13 +65,18 @@ export const useDataStore = create<State & Actions>()(
       }),
     setLimit: (qty: number) =>
       set((state) => {
-        state.limit -= qty;
+        state.page = 1;
+        state.limit = qty;
       }),
     setSort: (desc) =>
       set((state) => {
-        console.log(desc);
         state.sort = desc.direction;
         state.sort_by = desc.column.toString();
+      }),
+    setSearch: (search) =>
+      set((state) => {
+        state.page = 1;
+        state.search = search;
       }),
   }))
 );
