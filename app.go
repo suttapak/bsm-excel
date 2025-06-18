@@ -5,8 +5,6 @@ import (
 	"context"
 	"encoding/binary"
 	"encoding/hex"
-	"fmt"
-	"log"
 	"math"
 	"strings"
 
@@ -31,9 +29,10 @@ type App struct {
 	message         chan []byte
 	result          chan []float32
 	measurement     *MeasurementService
+	logger          AppLogger
 }
 
-func NewApp(measurement *MeasurementService) *App {
+func NewApp(measurement *MeasurementService, logger AppLogger) *App {
 
 	return &App{
 		monitors:        make(map[uuid.UUID]*Monitor),
@@ -42,28 +41,23 @@ func NewApp(measurement *MeasurementService) *App {
 		message:         make(chan []byte),
 		result:          make(chan []float32),
 		measurement:     measurement,
+		logger:          logger,
 	}
 }
 
 func hexToFloat(dataPipe []string) []float32 {
 	result := []float32{}
 	for _, v := range dataPipe {
-		// Remove any null bytes and whitespace
 		data, err := hex.DecodeString(v)
 		if err != nil {
-			// runtime.EventsEmit(a.ctx, "error", err)
-			log.Println(err, "original:", v)
 			continue
 		}
 		if len(data) != 4 {
-			// runtime.EventsEmit(a.ctx, "error", data)
-			log.Println("unexpected length:", len(data))
 			continue
 		}
 		bits := binary.BigEndian.Uint32(data)
 		f := math.Float32frombits(bits)
 		result = append(result, f)
-		fmt.Println(f)
 	}
 
 	return result
@@ -71,9 +65,8 @@ func hexToFloat(dataPipe []string) []float32 {
 
 func (a *App) startup(ctx context.Context) {
 	a.ctx = ctx
-	measurement := MeasurementService{}
 
-	measurement.start(ctx)
+	a.measurement.start(ctx)
 
 	for {
 		select {
@@ -85,27 +78,22 @@ func (a *App) startup(ctx context.Context) {
 				delete(a.monitors, id)
 			}
 		case message := <-a.message:
-			// fmt.Println("message : ", string(message))
-			// msg := strings.Split(string(message), string([]byte{0x1B}))
-			// fmt.Println("msg", msg)
-			// fmt.Println("new message comming")
-			// log.Println(message)
-			fmt.Println(string(message))
+			a.logger.Debug("message received: " + string(message))
 			msg := strings.Split(string(message), string(rune(0x1B)))
 
 			if len(msg) != 5 {
+				a.logger.Error("message splinting with 0x1B lessthan 5")
 				return
 			}
 			var dataPipe []string = strings.Split(msg[4], string(rune(0x1A)))
 
 			if len(dataPipe) != 7 {
-				fmt.Println("len datapipe", len(dataPipe))
+				a.logger.Error("data pipe less than 7 buffer")
 				return
 			}
 			result := hexToFloat(dataPipe[:6])
-			fmt.Println(result)
-			fmt.Println(dataPipe)
-			// fmt.Println(dataPipe)
+			a.logger.Debug("result: " + strings.Join(dataPipe[:6], ", "))
+
 			a.result <- result
 
 		case result := <-a.result:
@@ -120,9 +108,8 @@ func (a *App) startup(ctx context.Context) {
 				Height: res.Height,
 				BMI:    res.BMI,
 			}
-			fmt.Println(measurement)
 			if err := a.measurement.Create(&measurement); err != nil {
-				log.Println(err)
+				a.logger.Error(err)
 			}
 
 		case <-a.ctx.Done():
@@ -131,9 +118,14 @@ func (a *App) startup(ctx context.Context) {
 	}
 }
 
-func (a *App) SelectMonitor(port string, mode serial.Mode) {
-	fmt.Println("mode", mode)
+func (a *App) SelectMonitor(port string) {
 	ctx, cancel := context.WithCancel(a.ctx)
+	mode := serial.Mode{
+		BaudRate: 115200,
+		StopBits: serial.OneStopBit,
+		Parity:   serial.NoParity,
+		DataBits: 8,
+	}
 	monitor := &Monitor{
 		ID:     uuid.New(),
 		ctx:    ctx,
@@ -158,8 +150,7 @@ var startMessage = []byte{0x02, 0x68, 0x0D, 0x0B, 0x52, 0x45, 0x31, 0x30, 0x49}
 func (a *App) run(m *Monitor) {
 	port, err := serial.Open(m.Port, &m.mode)
 	if err != nil {
-		log.Print(err)
-
+		a.logger.Error(err)
 		return
 	}
 	defer port.Close()
@@ -169,23 +160,17 @@ func (a *App) run(m *Monitor) {
 	for {
 		n, err := port.Read(buff)
 		if err != nil {
-			log.Fatal(err)
+			a.logger.Error(err)
+			message = []byte{}
 		}
 		if n == 0 {
-			fmt.Println("\nEOF")
-			break
+			message = []byte{}
 		}
 
-		// fmt.Printf("%v", string(buff[:n]))
 		message = append(message, buff[:n]...)
 
 		if strings.Contains(string(buff[:n]), string(byte(0x03))) {
-			// fmt.Println(string(message))
-			// fmt.Println(string(startMessage))
-			fmt.Println(message)
-			fmt.Println(startMessage)
 			if bytes.Contains(message, startMessage) {
-				fmt.Println("conditi")
 				a.message <- message
 			}
 			message = []byte{}

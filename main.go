@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"embed"
+	"log"
 
 	"github.com/wailsapp/wails/v2"
 	"github.com/wailsapp/wails/v2/pkg/options"
@@ -13,11 +14,19 @@ import (
 var assets embed.FS
 
 func main() {
+
+	logger, err := NewAppLogger()
+	if err != nil {
+		log.Fatal(err)
+	}
 	// Create an instance of the app structure
-	measurement := NewMeasurement()
-	app := NewApp(measurement)
+	measurement, err := NewMeasurement(logger)
+	if err != nil {
+		log.Fatal(err)
+	}
+	app := NewApp(measurement, logger)
 	// Create application with options
-	err := wails.Run(&options.App{
+	err = wails.Run(&options.App{
 		Title:         "BSM 370 Computer Interface",
 		Width:         1024,
 		Height:        768,
@@ -38,6 +47,6 @@ func main() {
 	})
 
 	if err != nil {
-		println("Error:", err.Error())
+		logger.Error(err)
 	}
 }

@@ -2,8 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
-	"log"
 	"os"
 	"path/filepath"
 
@@ -30,8 +28,9 @@ type (
 	}
 
 	MeasurementService struct {
-		ctx context.Context
-		db  *gorm.DB
+		ctx    context.Context
+		db     *gorm.DB
+		logger AppLogger
 	}
 
 	MeasurementResponse[T any] struct {
@@ -40,17 +39,20 @@ type (
 	}
 )
 
-func NewMeasurement() (m *MeasurementService) {
-	m = &MeasurementService{}
+func NewMeasurement(logger AppLogger) (m *MeasurementService, err error) {
+	m = &MeasurementService{
+		logger: logger,
+	}
 	ex, err := os.Executable()
 	if err != nil {
-		log.Fatal(err)
+		logger.Error(err)
+		return nil, err
 	}
 	dsn := filepath.Join(filepath.Dir(ex), "measurement.db")
-	fmt.Println("dsh", dsn)
 	db, err := gorm.Open(sqlite.Open(dsn), &gorm.Config{})
 	if err != nil {
-		log.Fatal(err)
+		logger.Error(err)
+		return nil, err
 	}
 
 	db.AutoMigrate(&Measurement{})
@@ -85,18 +87,14 @@ func (m *MeasurementService) FindAll(req *FindAllRequest) (res MeasurementRespon
 		models       = []Measurement{}
 	)
 
-	fmt.Println("filter", filter)
 	query := m.db.Model(&Measurement{})
 	if filter.Validate() {
-		fmt.Println("1")
 		query.Order(filter.OrderBy + " " + filter.Order)
 	} else {
-		fmt.Println("2")
 		query = query.Order("created_at desc")
 	}
 
 	if req.Search != "" {
-		fmt.Println("4")
 		query = query.Scopes(ILike("patient_id", req.Search))
 	}
 	query = query.Count(&count)
