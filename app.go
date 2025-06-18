@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/google/uuid"
+	"github.com/spf13/viper"
 	"github.com/wailsapp/wails/v2/pkg/runtime"
 	"go.bug.st/serial"
 )
@@ -30,6 +31,7 @@ type App struct {
 	result          chan []float32
 	measurement     *MeasurementService
 	logger          AppLogger
+	config          *Config
 }
 
 func NewApp(measurement *MeasurementService, logger AppLogger) *App {
@@ -63,10 +65,16 @@ func hexToFloat(dataPipe []string) []float32 {
 	return result
 }
 
-func (a *App) startup(ctx context.Context) {
+func (a *App) startup(ctx context.Context, conf *Config) {
+	a.logger.Info("Application started")
+	a.logger.Debug("Application started with config: " + conf.Name)
 	a.ctx = ctx
-
+	a.config = conf
 	a.measurement.start(ctx)
+
+	if a.config.PORT != "" {
+		a.SelectMonitor(a.config.PORT)
+	}
 
 	for {
 		select {
@@ -118,7 +126,38 @@ func (a *App) startup(ctx context.Context) {
 	}
 }
 
+func (a *App) GetMonitors() ([]Monitor, error) {
+	monitors := []Monitor{}
+	for _, monitor := range a.monitors {
+		monitors = append(monitors, *monitor)
+	}
+	return monitors, nil
+
+}
+
 func (a *App) SelectMonitor(port string) {
+	ports, err := serial.GetPortsList()
+	if err != nil {
+		a.logger.Error("failed to get serial ports: " + err.Error())
+	}
+	// Check if the port is valid
+	validPort := false
+	for _, p := range ports {
+		if p == port {
+			validPort = true
+			break
+		}
+	}
+	if validPort {
+		a.config.PORT = ""
+		viper.Set("PORT", "")
+		if err := viper.WriteConfig(); err != nil {
+			a.logger.Error("failed to write config: " + err.Error())
+		}
+		a.logger.Error("invalid serial port: " + port)
+
+		return
+	}
 	ctx, cancel := context.WithCancel(a.ctx)
 	mode := serial.Mode{
 		BaudRate: 115200,

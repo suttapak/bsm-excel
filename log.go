@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"os"
+	"path/filepath"
 
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -29,12 +30,26 @@ func ensureDir(path string) error {
 	return nil
 }
 
+func ensureFile(path string) error {
+	if _, err := os.Stat(path); os.IsNotExist(err) {
+		file, err := os.Create(path)
+		if err != nil {
+			return err
+		}
+		defer file.Close()
+	}
+	return nil
+}
+
 func NewAppLogger() (AppLogger, error) {
-
 	// Define log directories
-
+	ex, err := os.Executable()
+	if err != nil {
+		return nil, err
+	}
+	path := filepath.Join(filepath.Dir(ex), "logs")
 	// Ensure all log directories exist
-	if err := ensureDir("./logs"); err != nil {
+	if err := ensureDir(path); err != nil {
 		log.Fatalf("Failed to create log directory: %s, error: %v", "logs", err)
 	}
 	config := zap.NewDevelopmentConfig()
@@ -42,8 +57,8 @@ func NewAppLogger() (AppLogger, error) {
 	config.EncoderConfig.EncodeTime = zapcore.ISO8601TimeEncoder
 	config.EncoderConfig.StacktraceKey = ""
 
-	config.OutputPaths = []string{"./logs/logs.log"}
-	config.ErrorOutputPaths = []string{"./logs/errs.log"}
+	config.OutputPaths = []string{filepath.Join(path, "app.log")}
+	config.ErrorOutputPaths = []string{filepath.Join(path, "errs.log")}
 
 	logger, err := config.Build(zap.AddCallerSkip(1))
 	if err != nil {

@@ -14,6 +14,8 @@ import (
 var assets embed.FS
 
 func main() {
+	// conf := NewAppConfig()
+	// _ = conf // to avoid unused variable error
 
 	logger, err := NewAppLogger()
 	if err != nil {
@@ -37,7 +39,9 @@ func main() {
 			Assets: assets,
 		},
 		OnStartup: func(ctx context.Context) {
-			app.startup(ctx)
+			conf := NewAppConfig()
+
+			app.startup(ctx, conf)
 			measurement.start(ctx)
 		},
 		Bind: []interface{}{

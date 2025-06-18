@@ -51,11 +51,9 @@ function App() {
       {JSON.stringify(result)}
       <hr />
       {isLoading && <p>loading...</p>}
-      {ports?.map((port) => (
-        <button onClick={() => setPort(port)}>{port}</button>
-      ))}
+      {ports?.map((port) => <button onClick={() => setPort(port)}>{port}</button>)}
       <hr />
-      <SerialPort port={port} onCancel={() => setPort(null)} onSubmit={(port, mode) => SelectMonitor(port, mode)} />
+      <SerialPort port={port} onCancel={() => setPort(null)} onSubmit={(port, mode) => SelectMonitor(port)} />
       <hr />
       <button onClick={TestReult}>test result</button>
     </>

@@ -1,10 +1,8 @@
 import React, { useRef } from "react";
 
-import { serial } from "../wailsjs/go/models";
-
 type Props = {
   port: string | null;
-  onSubmit?: (port: string, mode: serial.Mode) => void;
+  onSubmit?: (port: string, mode: any) => void;
   onCancel?: () => void;
 };
 
@@ -15,24 +13,14 @@ const SerialPort = (props: Props) => {
     DataBits: 8,
     Parity: 0,
     StopBits: 0,
-  } as serial.Mode);
+  });
 
   if (!port) return null;
   return (
     <div style={{ display: "flex", gap: "4px" }}>
-      <input
-        placeholder="port"
-        type="text"
-        name="port"
-        id="port"
-        value={port}
-      />
+      <input placeholder="port" type="text" name="port" id="port" value={port} />
       <label htmlFor="BaudRate">Baud Rate:</label>
-      <select
-        onChange={(e) => (mode.current.BaudRate = parseInt(e.target.value))}
-        name="BaudRate"
-        id="BaudRate"
-      >
+      <select onChange={(e) => (mode.current.BaudRate = parseInt(e.target.value))} name="BaudRate" id="BaudRate">
         <option value="300">300</option>
         <option value="1200">1200</option>
         <option value="2400">2400</option>
@@ -50,11 +38,7 @@ const SerialPort = (props: Props) => {
       </select>
 
       <label htmlFor="DataBits">Data Bits:</label>
-      <select
-        name="DataBits"
-        onChange={(e) => (mode.current.DataBits = parseInt(e.target.value))}
-        id="DataBits"
-      >
+      <select name="DataBits" onChange={(e) => (mode.current.DataBits = parseInt(e.target.value))} id="DataBits">
         <option value="5">5</option>
         <option value="6">6</option>
         <option value="7">7</option>
@@ -64,11 +48,7 @@ const SerialPort = (props: Props) => {
       </select>
 
       <label htmlFor="Parity">Parity:</label>
-      <select
-        name="Parity"
-        onChange={(e) => (mode.current.Parity = parseInt(e.target.value))}
-        id="Parity"
-      >
+      <select name="Parity" onChange={(e) => (mode.current.Parity = parseInt(e.target.value))} id="Parity">
         <option value="0" selected>
           None
         </option>
@@ -79,11 +59,7 @@ const SerialPort = (props: Props) => {
       </select>
 
       <label htmlFor="StopBits">Stop Bits:</label>
-      <select
-        name="StopBits"
-        onChange={(e) => (mode.current.StopBits = parseInt(e.target.value))}
-        id="StopBits"
-      >
+      <select name="StopBits" onChange={(e) => (mode.current.StopBits = parseInt(e.target.value))} id="StopBits">
         <option value="0" selected>
           1
         </option>
@@ -93,10 +69,7 @@ const SerialPort = (props: Props) => {
       <button disabled={!onCancel} onClick={() => onCancel?.()}>
         cancel
       </button>
-      <button
-        disabled={!onSubmit}
-        onClick={() => onSubmit?.(port, mode.current)}
-      >
+      <button disabled={!onSubmit} onClick={() => onSubmit?.(port, mode.current)}>
         submit
       </button>
     </div>
