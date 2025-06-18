@@ -18,7 +18,6 @@ const RunningLed = (props: RunningLedProps) => {
             : "ไม่มีการเชื่อต่อ"
         }
       >
-        s
         <Button isIconOnly size="sm" color={isRunning ? "success" : "default"}>
           {isRunning ? (
             <>
