@@ -110,11 +110,15 @@ func (m *MeasurementService) FindAll(req *FindAllRequest) (res MeasurementRespon
 }
 
 func (m *MeasurementService) Find(date time.Time) (res []Measurement, err error) {
-	where := "created_at >= ? AND created_at < ?"
-	startOfDay := date.Truncate(24 * time.Hour)
+	loc, _ := time.LoadLocation("Asia/Bangkok")
+	startOfDay := time.Date(date.Year(), date.Month(), date.Day(), 0, 0, 0, 0, loc)
 	endOfDay := startOfDay.Add(24 * time.Hour)
-	err = m.db.Where(where, startOfDay, endOfDay).Find(&res).Error
-	return
+
+	err = m.db.
+		Where("created_at >= ? AND created_at < ?", startOfDay, endOfDay).
+		Find(&res).Error
+
+	return res, err
 }
 
 func ILike(column, value string) func(*gorm.DB) *gorm.DB {
