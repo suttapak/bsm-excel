@@ -12,7 +12,7 @@ const ExportModal = () => {
     timeZone: getLocalTimeZone(),
   });
   const date = new Date();
-  const [value, setValue] = useState<CalendarDate | null>(new CalendarDate(date.getFullYear(), date.getMonth(), date.getDate()));
+  const [value, setValue] = useState<CalendarDate | null>(new CalendarDate(date.getFullYear(), date.getMonth() + 1, date.getDate()));
 
   const { onOpen, ...modal } = useDisclosure();
 

@@ -74,6 +74,7 @@ func (e *Exporter) ExportToExcel(date string) error {
 		e.logger.Error("Failed to fetch measurements" + err.Error())
 		return err
 	}
+	fmt.Println("Fetched data:", data)
 	if err := ensureExcelFile(); err != nil {
 		e.logger.Error("Failed to ensure excel file: " + err.Error())
 		return err

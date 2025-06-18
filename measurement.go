@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"path/filepath"
 	"time"
@@ -109,13 +110,17 @@ func (m *MeasurementService) FindAll(req *FindAllRequest) (res MeasurementRespon
 	return
 }
 
-func (m *MeasurementService) Find(date time.Time) (res []Measurement, err error) {
-	loc, _ := time.LoadLocation("Asia/Bangkok")
-	startOfDay := time.Date(date.Year(), date.Month(), date.Day(), 0, 0, 0, 0, loc)
-	endOfDay := startOfDay.Add(24 * time.Hour)
+func (m *MeasurementService) Find(date time.Time) ([]Measurement, error) {
+	var res []Measurement
+	str := m.db.ToSQL(func(tx *gorm.DB) *gorm.DB {
+		return tx.Where("date(created_at) = ?", date.Local().Format("2006-01-02")).
+			Find(&res)
+	})
 
-	err = m.db.
-		Where("created_at >= ? AND created_at < ?", startOfDay, endOfDay).
+	fmt.Println("SQL Query:", str)
+
+	err := m.db.
+		Where("date(created_at) = ?", date.Local().Format("2006-01-02")).
 		Find(&res).Error
 
 	return res, err
