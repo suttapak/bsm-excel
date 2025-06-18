@@ -12,6 +12,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/spf13/viper"
+	"github.com/wailsapp/wails/v2/pkg/options"
 	"github.com/wailsapp/wails/v2/pkg/runtime"
 	"go.bug.st/serial"
 )
@@ -67,16 +68,30 @@ func hexToFloat(dataPipe []string) []float32 {
 	return result
 }
 
+func (a *App) ready() {
+	if a.config.PORT != "" {
+		a.logger.Debug("PORT NOT EMPTY " + a.config.PORT)
+		if err := a.SelectMonitor(a.config.PORT); err != nil {
+			a.logger.Error(err)
+		}
+	}
+
+}
+
+func (a *App) onSecondInstanceLaunch(secondInstanceData options.SecondInstanceData) {
+	secondInstanceArgs := secondInstanceData.Args
+
+	runtime.WindowUnminimise(a.ctx)
+	runtime.Show(a.ctx)
+	go runtime.EventsEmit(a.ctx, "launchArgs", secondInstanceArgs)
+}
+
 func (a *App) startup(ctx context.Context, conf *Config) {
 	a.logger.Info("Application started")
 	a.logger.Debug("Application started with config: " + conf.Name)
 	a.ctx = ctx
 	a.config = conf
 	a.measurement.start(ctx)
-
-	if a.config.PORT != "" {
-		a.SelectMonitor(a.config.PORT)
-	}
 
 	for {
 		select {
@@ -103,13 +118,6 @@ func (a *App) startup(ctx context.Context, conf *Config) {
 			}
 			result := hexToFloat(dataPipe[:6])
 			a.logger.Debug("result: " + strings.Join(dataPipe[:6], ", "))
-
-			a.result <- result
-			a.logger.Debug("result sent to channel")
-
-		case result := <-a.result:
-			a.logger.Debug("result received: " + strings.Join(strings.Split(fmt.Sprintf("%v", result), " "), ", "))
-			runtime.EventsEmit(a.ctx, "result", result)
 			res := Result{
 				Height: result[3],
 				Weigth: result[0],
@@ -165,6 +173,11 @@ func (a *App) SelectMonitor(port string) error {
 
 		return errors.New("invalid serial port: " + port)
 	}
+	viper.Set("PORT", port)
+
+	if err := viper.WriteConfig(); err != nil {
+		a.logger.Error("failed to write config: " + err.Error())
+	}
 	ctx, cancel := context.WithCancel(a.ctx)
 	mode := serial.Mode{
 		BaudRate: 115200,
@@ -207,7 +220,9 @@ func (a *App) run(m *Monitor) {
 	for {
 		n, err := port.Read(buff)
 		if err != nil {
+
 			a.logger.Error(err)
+			delete(a.monitors, m.ID)
 			message = []byte{}
 		}
 		if n == 0 {

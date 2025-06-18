@@ -29,24 +29,34 @@ func main() {
 	app := NewApp(measurement, logger)
 	// Create application with options
 	err = wails.Run(&options.App{
-		Title:         "BSM 370 Computer Interface",
-		Width:         1024,
-		Height:        768,
-		DisableResize: true,
-		Fullscreen:    false,
-		Frameless:     false,
+		Title:      "BSM 370 Computer Interface",
+		Width:      1024,
+		Height:     768,
+		Fullscreen: false,
+		Frameless:  false,
+
 		AssetServer: &assetserver.Options{
 			Assets: assets,
 		},
 		OnStartup: func(ctx context.Context) {
 			conf := NewAppConfig()
-
-			app.startup(ctx, conf)
+			logger.Debug("initial config success")
 			measurement.start(ctx)
+			logger.Debug("initial measurement service success")
+			app.startup(ctx, conf)
+			logger.Debug("initial application success")
+
+		},
+		OnDomReady: func(ctx context.Context) {
+			app.ready()
 		},
 		Bind: []interface{}{
 			app,
 			measurement,
+		},
+		SingleInstanceLock: &options.SingleInstanceLock{
+			UniqueId:               "e3984e08-28dc-4e3d-b70a-45e961589cdc",
+			OnSecondInstanceLaunch: app.onSecondInstanceLaunch,
 		},
 	})
 

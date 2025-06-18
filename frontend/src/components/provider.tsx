@@ -12,16 +12,17 @@ declare module "@react-types/shared" {
   }
 }
 
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 import { Toaster } from "react-hot-toast";
-const queryClient = new QueryClient();
 export function Providers({ children }: { children: React.ReactNode }) {
   let router = useRouter();
   return (
-    <QueryClientProvider client={queryClient}>
-      <HeroUIProvider navigate={(to, options) => router.navigate({ to, ...options })} useHref={(to) => router.buildLocation({ to }).href}>
+    <>
+      <HeroUIProvider
+        navigate={(to, options) => router.navigate({ to, ...options })}
+        useHref={(to) => router.buildLocation({ to }).href}
+      >
         <ToastProvider />
         <Toaster />
         {children}
@@ -29,6 +30,6 @@ export function Providers({ children }: { children: React.ReactNode }) {
 
       <ReactQueryDevtools initialIsOpen={false} />
       <TanStackRouterDevtools />
-    </QueryClientProvider>
+    </>
   );
 }
