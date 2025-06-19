@@ -61,6 +61,71 @@ func ensureExcelFile() error {
 	return nil
 }
 
+func (e *Exporter) ExportPatientToExcel(patientId string) error {
+
+	data, err := e.measurementService.FindByID(patientId)
+	if err != nil {
+		e.logger.Error("Failed to fetch measurements" + err.Error())
+		return err
+	}
+	fmt.Println("Fetched data:", data)
+	if err := ensureExcelFile(); err != nil {
+		e.logger.Error("Failed to ensure excel file: " + err.Error())
+		return err
+	}
+
+	ex, err := os.Executable()
+	if err != nil {
+		e.logger.Error("Failed to get executable path: " + err.Error())
+		return err
+	}
+	filePath := filepath.Join(filepath.Dir(ex), "defaul.xlsx")
+
+	f, err := excelize.OpenFile(filePath)
+	if err != nil {
+		e.logger.Error("Failed to open excel file: " + err.Error())
+		return err
+
+	}
+	defer f.Close()
+	rowStart := 10
+	for _, measurement := range data {
+		if measurement.PatientID != "" {
+			f.SetCellValue("Result (2)", fmt.Sprintf("D%d", 3), measurement.PatientID)
+
+		}
+		if measurement.FullName != "" {
+			f.SetCellValue("Result (2)", fmt.Sprintf("D%d", 4), measurement.FullName)
+
+		}
+
+		f.SetCellValue("Result (2)", fmt.Sprintf("A%d", rowStart), measurement.ID)
+		f.SetCellValue("Result (2)", fmt.Sprintf("B%d", rowStart), measurement.CreatedAt.Format(time.DateOnly))
+		f.SetCellValue("Result (2)", fmt.Sprintf("C%d", rowStart), measurement.CreatedAt.Format(time.TimeOnly))
+		f.SetCellValue("Result (2)", fmt.Sprintf("D%d", rowStart), measurement.PatientID)
+		f.SetCellValue("Result (2)", fmt.Sprintf("E%d", rowStart), measurement.Weight)
+		f.SetCellValue("Result (2)", fmt.Sprintf("F%d", rowStart), measurement.Height)
+		f.SetCellValue("Result (2)", fmt.Sprintf("G%d", rowStart), measurement.BMI)
+		rowStart++
+	}
+	option := runtime.SaveDialogOptions{
+		Title:           "บันทึกไฟล์",
+		DefaultFilename: fmt.Sprintf("ผลลัพธ์-%s.xlsx", patientId),
+	}
+	savePath, err := runtime.SaveFileDialog(e.ctx, option)
+	if err != nil {
+		e.logger.Error("Failed to open save dialog: " + err.Error())
+		return err
+	}
+
+	if err := f.SaveAs(savePath); err != nil {
+		e.logger.Error("Failed to save excel file: " + err.Error())
+		return err
+	}
+
+	return nil
+}
+
 func (e *Exporter) ExportToExcel(date string) error {
 	condition := time.Now()
 	fmt.Println("Exporting to Excel with date:", date)

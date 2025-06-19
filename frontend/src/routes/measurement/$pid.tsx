@@ -20,9 +20,10 @@ import {
 import { useDataStore, useFindAllMeasurement, useFindByID, useUpdatePatienID, useUpdatePatienName } from "@/hooks/use-data";
 import { formatShortDateOnly, formatShortTimeOnly } from "@/date/formater";
 import { ArrowRight } from "lucide-react";
-import { useExporter } from "@/hooks/use-exporter";
+import { useExporter, useExporterPatient } from "@/hooks/use-exporter";
 import ExportModal from "@/components/export-modal";
 import { useMemo } from "react";
+import ExportPatientModal from "@/components/export-patient-modal";
 export const Route = createFileRoute("/measurement/$pid")({
   component: RouteComponent,
 });
@@ -55,6 +56,9 @@ function RouteComponent() {
         <BreadcrumbItem href="/">ตารางข้อมูลวัดผล</BreadcrumbItem>
         <BreadcrumbItem>{pid}</BreadcrumbItem>
       </Breadcrumbs>
+      <div className="flex justify-end">
+        <ExportPatientModal full_name={full_name} patien_id={patien_id} />
+      </div>
       <Card>
         <CardHeader className="flex items-center justify-center">
           บันทึกข้อมูลการตรวจวัด น้ำหนักส่วนสูง และ ค่าดัชนีมวลกาย เครื่องชั่งน้ำหนักวัดส่วนสูงอัตโนมัติ ยี่ห้อ Inbody รุ่น BSM370
