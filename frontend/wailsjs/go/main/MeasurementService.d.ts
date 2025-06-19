@@ -11,6 +11,10 @@ export function Find(arg1:time.Time):Promise<Array<main.Measurement>>;
 
 export function FindAll(arg1:main.FindAllRequest):Promise<main.MeasurementResponse___main_Measurement_>;
 
+export function FindByID(arg1:string):Promise<Array<main.Measurement>>;
+
 export function Update(arg1:number,arg2:main.Measurement):Promise<void>;
 
 export function UpdatePatienID(arg1:number,arg2:string):Promise<void>;
+
+export function UpdatePatienName(arg1:string,arg2:string):Promise<void>;

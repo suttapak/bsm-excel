@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SettingRouteImport } from './routes/setting'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as MeasurementPidRouteImport } from './routes/measurement/$pid'
 
 const SettingRoute = SettingRouteImport.update({
   id: '/setting',
@@ -22,31 +23,40 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const MeasurementPidRoute = MeasurementPidRouteImport.update({
+  id: '/measurement/$pid',
+  path: '/measurement/$pid',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/setting': typeof SettingRoute
+  '/measurement/$pid': typeof MeasurementPidRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/setting': typeof SettingRoute
+  '/measurement/$pid': typeof MeasurementPidRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/setting': typeof SettingRoute
+  '/measurement/$pid': typeof MeasurementPidRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/setting'
+  fullPaths: '/' | '/setting' | '/measurement/$pid'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/setting'
-  id: '__root__' | '/' | '/setting'
+  to: '/' | '/setting' | '/measurement/$pid'
+  id: '__root__' | '/' | '/setting' | '/measurement/$pid'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   SettingRoute: typeof SettingRoute
+  MeasurementPidRoute: typeof MeasurementPidRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -65,12 +75,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/measurement/$pid': {
+      id: '/measurement/$pid'
+      path: '/measurement/$pid'
+      fullPath: '/measurement/$pid'
+      preLoaderRoute: typeof MeasurementPidRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   SettingRoute: SettingRoute,
+  MeasurementPidRoute: MeasurementPidRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

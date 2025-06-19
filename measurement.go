@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"os"
 	"path/filepath"
 	"time"
@@ -79,7 +78,19 @@ func (m *MeasurementService) Delete(id uint) error {
 }
 
 func (m *MeasurementService) UpdatePatienID(id uint, pId string) error {
-	return m.db.Model(&Measurement{}).Where("id = ?", id).Update("patient_id", pId).Error
+
+	var model Measurement = Measurement{}
+	m.db.Where("patient_id = ?", pId).First(&model)
+
+	if err := m.db.Model(&Measurement{}).Where("id = ?", id).Update("patient_id", pId).Error; err != nil {
+		return err
+	}
+
+	return m.db.Model(&Measurement{}).Where("patient_id = ?", id).Update("full_name", model.FullName).Error
+}
+
+func (m *MeasurementService) UpdatePatienName(id string, name string) error {
+	return m.db.Model(&Measurement{}).Where("patient_id = ?", id).Update("full_name", name).Error
 }
 
 func (m *MeasurementService) FindAll(req *FindAllRequest) (res MeasurementResponse[[]Measurement], err error) {
@@ -112,12 +123,6 @@ func (m *MeasurementService) FindAll(req *FindAllRequest) (res MeasurementRespon
 
 func (m *MeasurementService) Find(date time.Time) ([]Measurement, error) {
 	var res []Measurement
-	str := m.db.ToSQL(func(tx *gorm.DB) *gorm.DB {
-		return tx.Where("date(created_at) = ?", date.Local().Format("2006-01-02")).
-			Find(&res)
-	})
-
-	fmt.Println("SQL Query:", str)
 
 	err := m.db.
 		Where("date(created_at) = ?", date.Local().Format("2006-01-02")).
@@ -130,4 +135,14 @@ func ILike(column, value string) func(*gorm.DB) *gorm.DB {
 	return func(db *gorm.DB) *gorm.DB {
 		return db.Where("LOWER("+column+") LIKE LOWER(?)", "%"+value+"%")
 	}
+}
+
+func (m *MeasurementService) FindByID(pid string) ([]Measurement, error) {
+	var res []Measurement
+
+	err := m.db.
+		Where("patient_id = ?", pid).
+		Find(&res).Error
+
+	return res, err
 }

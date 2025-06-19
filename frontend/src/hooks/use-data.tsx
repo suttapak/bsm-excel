@@ -1,11 +1,12 @@
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import React from "react";
-import { FindAll, UpdatePatienID } from "#/go/main/MeasurementService";
+import { FindAll, FindByID, UpdatePatienID, UpdatePatienName } from "#/go/main/MeasurementService";
 import { SortDescriptor } from "@heroui/react";
 import { main } from "#/go/models";
 
 export const keys = {
   measurement: (page: number, limit: number, sort: string, sortBy: string, serach: string) => ["measurement", page, limit, sort, sortBy, serach] as const,
+  pid: (pid: string) => ["pid", pid] as const,
 };
 export const useFindAllMeasurement = () => {
   const { page, limit, sort_by, sort, search } = useDataStore();
@@ -20,17 +21,41 @@ export const useFindAllMeasurement = () => {
         sort: sort,
         sort_by: sort_by,
       }),
-    refetchInterval: 1000, // ⏱️ every 1000ms = 1 second
-    refetchIntervalInBackground: true, // optional: continue in background tab
+    // refetchInterval: 1000, // ⏱️ every 1000ms = 1 second
+    // refetchIntervalInBackground: true, // optional: continue in background tab
   });
 };
 
 export const useUpdatePatienID = () => {
+  const client = useQueryClient();
+  const { page, limit, sort_by, sort, search } = useDataStore();
   return useMutation({
     mutationFn: (data: { id: number; pId: string }) => {
-      console.log(data);
       return UpdatePatienID(data.id, data.pId);
     },
+    onSuccess: () => {
+      client.invalidateQueries({ queryKey: keys.measurement(page, limit, sort, sort_by, search) });
+    },
+  });
+};
+
+export const useUpdatePatienName = (pid: string) => {
+  const client = useQueryClient();
+
+  return useMutation({
+    mutationFn: (data: { id: string; name: string }) => {
+      return UpdatePatienName(data.id, data.name);
+    },
+    onSuccess: () => {
+      client.invalidateQueries({ queryKey: keys.pid(pid) });
+    },
+  });
+};
+
+export const useFindByID = (pid: string) => {
+  return useSuspenseQuery({
+    queryKey: keys.pid(pid),
+    queryFn: () => FindByID(pid),
   });
 };
 

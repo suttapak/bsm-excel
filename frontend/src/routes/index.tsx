@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { Table, TableHeader, TableColumn, TableBody, TableRow, TableCell, Pagination, Skeleton, Spinner, Input, Chip, Button, Tooltip } from "@heroui/react";
 import { useDataStore, useFindAllMeasurement, useUpdatePatienID } from "@/hooks/use-data";
 import { formatShortDateOnly, formatShortTimeOnly } from "@/date/formater";
@@ -83,7 +83,7 @@ function RouteComponent() {
               </TableCell>
               <TableCell>
                 <Tooltip content={`ดูเพิ่มเติมสำหรับหมายเลขประจำตัว [${item.patient_id}]`}>
-                  <Button isIconOnly size="sm" color="secondary" variant="light">
+                  <Button as={Link} to={`/measurement/${item.patient_id}`} isIconOnly size="sm" color="secondary" variant="light">
                     <ArrowRight size={18} />
                   </Button>
                 </Tooltip>
