@@ -220,9 +220,8 @@ func (a *App) run(m *Monitor) {
 	for {
 		n, err := port.Read(buff)
 		if err != nil {
-
 			a.logger.Error(err)
-			delete(a.monitors, m.ID)
+			a.unselectMonitor <- m.ID
 			message = []byte{}
 		}
 		if n == 0 {
@@ -244,6 +243,7 @@ func (a *App) run(m *Monitor) {
 		}
 
 		if m.ctx.Err() != nil {
+			a.unselectMonitor <- m.ID
 			return
 		}
 	}

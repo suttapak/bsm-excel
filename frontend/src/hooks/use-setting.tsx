@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { GetSerialPort, GetMonitors } from "#/go/main/App";
+import { GetSerialPort, GetMonitors, SelectMonitor } from "#/go/main/App";
 import { GetConfig, SetDepartment, SetName } from "#/go/main/Config";
 
 export const keys = {
@@ -14,6 +14,17 @@ export const useGetPorts = () => {
     queryFn: () => GetSerialPort(),
   });
 };
+
+export const useSelectMonitor = () => {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: (port: string) => SelectMonitor(port),
+    onSuccess: () => {
+      client.invalidateQueries({ queryKey: keys.monitors });
+    },
+  });
+};
+
 export const useGetMonitors = () => {
   return useQuery({
     queryKey: keys.monitors,

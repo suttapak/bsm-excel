@@ -1,11 +1,19 @@
 {
   "$schema": "https://wails.io/schemas/config.v2.json",
-  "name": "myproject",
-  "outputfilename": "myproject",
+  "name": "BSM 370 Computer Interface",
+  "outputfilename": "LBT-BSM370",
   "frontend:install": "npm install",
   "frontend:build": "npm run build",
   "frontend:dev:watcher": "npm run dev",
   "frontend:dev:serverUrl": "auto",
+  "info": {
+    "companyName": "Labotron Medical .Co",
+    "productName": "BSM 370 Computer Interface",
+    "productVersion": "1.0.0",
+    "windows": {
+      "executionLevel": "requireAdministrator"
+    }
+  },
   "author": {
     "name": "matee suttapak",
     "email": "suttapak.matee@gmail.com"

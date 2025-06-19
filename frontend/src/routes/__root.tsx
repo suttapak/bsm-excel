@@ -1,3 +1,4 @@
+import AppIcon from "@/components/appicon";
 import { Providers } from "@/components/provider";
 import RunningLed from "@/components/running-led";
 import SidebarItem from "@/components/sidbar-item";
@@ -8,6 +9,7 @@ import { createRootRoute, Outlet, useLocation } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 import { Home, Link, Menu, Search, Settings } from "lucide-react";
 import { Fragment } from "react";
+import { Link as HeroLink } from "@heroui/react";
 
 export const Route = createRootRoute({
   component: () => <Layout />,
@@ -23,7 +25,9 @@ const Layout = () => {
       <Navbar maxWidth="full" isBordered>
         <NavbarContent justify="start">
           <NavbarBrand className="mr-4">
-            <p className="font-bold text-inherit">ACME</p>
+            <HeroLink href="/">
+              <AppIcon />
+            </HeroLink>
           </NavbarBrand>
         </NavbarContent>
         <NavbarContent justify="end">
@@ -41,7 +45,7 @@ const Layout = () => {
         <DrawerContent>
           {(onClose) => (
             <Fragment>
-              <DrawerHeader>ACME</DrawerHeader>
+              <DrawerHeader>BSM 370 Computer Interface</DrawerHeader>
               <DrawerBody>
                 <ul className="flex flex-col gap-1">
                   <SidebarItem Icon={<Home />} onPress={onClose} path="/">

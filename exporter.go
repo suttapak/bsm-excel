@@ -163,6 +163,9 @@ func (e *Exporter) ExportToExcel(date string) error {
 
 	}
 	defer f.Close()
+	f.SetCellValue("Result", fmt.Sprintf("C%d", 3), e.conf.Name)
+	f.SetCellValue("Result", fmt.Sprintf("C%d", 4), e.conf.Department)
+	f.SetCellValue("Result", fmt.Sprintf("C%d", 5), condition.UTC().Format(time.DateOnly))
 	rowStart := 8
 	for _, measurement := range data {
 		f.SetCellValue("Result", fmt.Sprintf("A%d", rowStart), measurement.ID)

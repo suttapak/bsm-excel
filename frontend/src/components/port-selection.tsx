@@ -1,10 +1,8 @@
 import React from "react";
-import { useGetPorts } from "@/hooks/use-setting";
+import { useGetPorts, useSelectMonitor } from "@/hooks/use-setting";
 import { addToast, Alert, Button, Card, CardBody, CardFooter, CardHeader, Select, Selection, SelectItem, Skeleton, Tooltip } from "@heroui/react";
-import { createFileRoute } from "@tanstack/react-router";
 import { RefreshCw } from "lucide-react";
 import { useMemo, useState } from "react";
-import { SelectMonitor } from "#/go/main/App";
 import toast from "react-hot-toast";
 import { toastMessage } from "@/constant/toast-message";
 
@@ -16,6 +14,7 @@ const PortSelection = () => {
     }));
   }, [data]);
   const [port, setPort] = useState<string | null>(null);
+  const { mutateAsync, isPending } = useSelectMonitor();
   return (
     <Card>
       <CardHeader className="flex flex-row gap-2 justify-between">
@@ -53,9 +52,10 @@ const PortSelection = () => {
       <CardFooter>
         <Button
           isDisabled={!port}
+          isLoading={isPending}
           onPress={() => {
             if (!port) return;
-            toast.promise(() => SelectMonitor(port), toastMessage);
+            toast.promise(() => mutateAsync(port), toastMessage);
           }}
         >
           เลือกพอร์ต
