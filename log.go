@@ -41,7 +41,7 @@ func ensureFile(path string) error {
 	return nil
 }
 
-func NewAppLogger() (AppLogger, error) {
+func NewAppLogger(conf *Config) (AppLogger, error) {
 	// Define log directories
 	ex, err := os.Executable()
 	if err != nil {
@@ -58,7 +58,10 @@ func NewAppLogger() (AppLogger, error) {
 	config.EncoderConfig.StacktraceKey = ""
 
 	config.OutputPaths = []string{filepath.Join(path, "app.log")}
-	config.ErrorOutputPaths = []string{filepath.Join(path, "errs.log")}
+
+	if conf.EnableLog {
+		config.ErrorOutputPaths = []string{filepath.Join(path, "errs.log")}
+	}
 
 	logger, err := config.Build(zap.AddCallerSkip(1))
 	if err != nil {

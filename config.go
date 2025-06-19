@@ -14,6 +14,7 @@ type (
 		PORT       string `mapstructure:"PORT" yaml:"PORT" json:"port"`
 		Name       string `mapstructure:"NAME" yaml:"NAME" json:"name"`
 		Department string `json:"department" yaml:"DEPARTMENT"`
+		EnableLog  bool   `mapstructure:"ENABLE_LOG" yaml:"ENABLE_LOG" json:"enable_log"`
 	}
 )
 
@@ -45,6 +46,7 @@ func NewAppConfig() *Config {
 
 	viper.SetDefault("NAME", "รพ.ลาโบตรอน")
 	viper.SetDefault("DEPARTMENT", "แผนก technology")
+	viper.SetDefault("ENABLE_LOG", false)
 
 	viper.WriteConfig()
 
