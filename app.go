@@ -91,16 +91,20 @@ func (a *App) startup(ctx context.Context, conf *Config) {
 	a.logger.Debug("Application started with config: " + conf.Name)
 	a.ctx = ctx
 	a.config = conf
-	a.measurement.start(ctx)
 
 	for {
 		select {
 		case monitor := <-a.selectMonitor:
+			a.logger.Debug("selecting monitor with id: " + monitor.ID.String())
 			go a.run(monitor)
+			a.logger.Debug("monitor with id: " + monitor.ID.String() + " selected")
 		case id := <-a.unselectMonitor:
+			a.logger.Debug("unselecting monitor with id: " + id.String())
 			if monitor, ok := a.monitors[id]; ok {
 				monitor.cancel()
+				a.logger.Debug("canceling monitor with id: " + id.String())
 				delete(a.monitors, id)
+				a.logger.Debug("monitor with id: " + id.String() + " unselected")
 			}
 		case message := <-a.message:
 			a.logger.Debug("message received: " + string(message))
@@ -135,6 +139,7 @@ func (a *App) startup(ctx context.Context, conf *Config) {
 			a.logger.Debug("measurement saved to database")
 
 		case <-a.ctx.Done():
+			a.logger.Debug("application context done")
 			return
 		}
 	}
@@ -150,6 +155,14 @@ func (a *App) GetMonitors() ([]Monitor, error) {
 }
 
 func (a *App) SelectMonitor(port string) error {
+	a.logger.Debug("selecting monitor on port: " + port)
+	for _, monitor := range a.monitors {
+		if monitor.Port == port {
+			a.logger.Debug("monitor already selected on port: " + port)
+
+			return errors.New("monitor already selected on port: " + port)
+		}
+	}
 	ports, err := serial.GetPortsList()
 	if err != nil {
 		a.logger.Error("failed to get serial ports: " + err.Error())
@@ -208,6 +221,7 @@ func (a *App) GetSerialPort() ([]string, error) {
 var startMessage = []byte{0x02, 0x68, 0x0D, 0x0B, 0x52, 0x45, 0x31, 0x30, 0x49}
 
 func (a *App) run(m *Monitor) {
+	a.logger.Debug("running monitor with id: " + m.ID.String())
 	port, err := serial.Open(m.Port, &m.mode)
 	if err != nil {
 		a.logger.Error(err)
@@ -220,7 +234,9 @@ func (a *App) run(m *Monitor) {
 	for {
 		n, err := port.Read(buff)
 		if err != nil {
+			a.logger.Error("failed to read from port: " + err.Error())
 			a.logger.Error(err)
+			a.logger.Debug("unselecting monitor with id: " + m.ID.String())
 			a.unselectMonitor <- m.ID
 			message = []byte{}
 		}
@@ -238,12 +254,19 @@ func (a *App) run(m *Monitor) {
 
 		}
 
-		if strings.Contains(string(buff[n:]), "\n") {
-			break
-		}
+		// if strings.Contains(string(buff[n:]), "\n") {
+
+		// 	a.logger.Debug("received message: " + string(buff[:n]))
+		// 	a.logger.Debug("message length: " + fmt.Sprintf("%d", n))
+		// 	a.unselectMonitor <- m.ID
+		// 	a.logger.Debug("unselecting a monitor cause recive \\n with id: " + m.ID.String())
+		// 	return
+		// }
 
 		if m.ctx.Err() != nil {
+			a.logger.Debug("context done for monitor with id: " + m.ID.String())
 			a.unselectMonitor <- m.ID
+			a.logger.Debug("unselecting monitor cause context done with id: " + m.ID.String())
 			return
 		}
 	}
