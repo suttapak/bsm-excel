@@ -16,12 +16,14 @@ type Exporter struct {
 	measurementService *MeasurementService
 	logger             AppLogger
 	ctx                context.Context
+	conf               *Config
 }
 
-func NewExporter(measurementService *MeasurementService, logger AppLogger) *Exporter {
+func NewExporter(measurementService *MeasurementService, logger AppLogger, conf *Config) *Exporter {
 	return &Exporter{
 		measurementService: measurementService,
 		logger:             logger,
+		conf:               conf,
 	}
 }
 func (e *Exporter) SetContext(ctx context.Context) {
@@ -89,6 +91,8 @@ func (e *Exporter) ExportPatientToExcel(patientId string) error {
 	}
 	defer f.Close()
 	rowStart := 10
+	f.SetCellValue("Result (2)", fmt.Sprintf("C%d", 5), e.conf.Name)
+	f.SetCellValue("Result (2)", fmt.Sprintf("C%d", 6), e.conf.Department)
 	for _, measurement := range data {
 		if measurement.PatientID != "" {
 			f.SetCellValue("Result (2)", fmt.Sprintf("D%d", 3), measurement.PatientID)

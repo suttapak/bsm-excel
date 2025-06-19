@@ -11,8 +11,9 @@ import (
 
 type (
 	Config struct {
-		PORT string `mapstructure:"PORT" yaml:"PORT" json:"port"`
-		Name string `mapstructure:"NAME" yaml:"NAME" json:"name"`
+		PORT       string `mapstructure:"PORT" yaml:"PORT" json:"port"`
+		Name       string `mapstructure:"NAME" yaml:"NAME" json:"name"`
+		Department string `json:"department" yaml:"DEPARTMENT"`
 	}
 )
 
@@ -42,7 +43,8 @@ func NewAppConfig() *Config {
 		panic("panic in config parser : " + err.Error())
 	}
 
-	viper.SetDefault("NAME", "BSM 370 Computer Interface")
+	viper.SetDefault("NAME", "รพ.ลาโบตรอน")
+	viper.SetDefault("DEPARTMENT", "แผนก technology")
 
 	viper.WriteConfig()
 
@@ -51,4 +53,29 @@ func NewAppConfig() *Config {
 		panic(err)
 	}
 	return conf
+}
+
+func (c *Config) GetConfig() (*Config, error) {
+	return c, nil
+}
+
+func (c *Config) SetName(name string) (*Config, error) {
+	c.Name = name
+	viper.Set("NAME", name)
+
+	if err := viper.WriteConfig(); err != nil {
+		return nil, err
+	}
+
+	return c, nil
+}
+func (c *Config) SetDepartment(name string) (*Config, error) {
+	c.Department = name
+	viper.Set("DEPARTMENT", name)
+
+	if err := viper.WriteConfig(); err != nil {
+		return nil, err
+	}
+
+	return c, nil
 }

@@ -21,13 +21,15 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	conf := NewAppConfig()
+	logger.Debug("initial config success")
 	// Create an instance of the app structure
 	measurement, err := NewMeasurement(logger)
 	if err != nil {
 		log.Fatal(err)
 	}
 	app := NewApp(measurement, logger)
-	exporter := NewExporter(measurement, logger)
+	exporter := NewExporter(measurement, logger, conf)
 	// Create application with options
 	err = wails.Run(&options.App{
 		Title:      "BSM 370 Computer Interface",
@@ -40,8 +42,7 @@ func main() {
 			Assets: assets,
 		},
 		OnStartup: func(ctx context.Context) {
-			conf := NewAppConfig()
-			logger.Debug("initial config success")
+
 			measurement.start(ctx)
 			logger.Debug("initial measurement service success")
 			exporter.SetContext(ctx)
@@ -57,6 +58,7 @@ func main() {
 			app,
 			measurement,
 			exporter,
+			conf,
 		},
 		SingleInstanceLock: &options.SingleInstanceLock{
 			UniqueId:               "e3984e08-28dc-4e3d-b70a-45e961589cdc",

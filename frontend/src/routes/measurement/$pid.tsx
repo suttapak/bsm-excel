@@ -16,6 +16,7 @@ import {
   Card,
   CardBody,
   CardHeader,
+  Skeleton,
 } from "@heroui/react";
 import { useDataStore, useFindAllMeasurement, useFindByID, useUpdatePatienID, useUpdatePatienName } from "@/hooks/use-data";
 import { formatShortDateOnly, formatShortTimeOnly } from "@/date/formater";
@@ -24,6 +25,7 @@ import { useExporter, useExporterPatient } from "@/hooks/use-exporter";
 import ExportModal from "@/components/export-modal";
 import { useMemo } from "react";
 import ExportPatientModal from "@/components/export-patient-modal";
+import { useGetConfig } from "@/hooks/use-setting";
 export const Route = createFileRoute("/measurement/$pid")({
   component: RouteComponent,
 });
@@ -49,6 +51,7 @@ function RouteComponent() {
   }, [data]);
 
   const { mutate, isPending } = useUpdatePatienName(pid);
+  const { data: config, isLoading: isLoadingConfig } = useGetConfig();
 
   return (
     <div className="flex flex-col gap-2">
@@ -72,8 +75,17 @@ function RouteComponent() {
             defaultValue={full_name}
             endContent={isPending && <Spinner />}
           />
-          <Input labelPlacement="outside" label={"โรงพยาบาล"} />
-          <Input labelPlacement="outside" label={"หน่วยงาน"} />
+          {isLoadingConfig ? (
+            <>
+              <Skeleton className="h-8" />
+              <Skeleton className="h-8" />
+            </>
+          ) : (
+            <>
+              <Input labelPlacement="outside" defaultValue={config?.name} label={"โรงพยาบาล"} />
+              <Input labelPlacement="outside" defaultValue={config?.department} label={"หน่วยงาน"} />
+            </>
+          )}
         </CardBody>
       </Card>
       <Table aria-label="ตารางข้อมูลวัดผล">

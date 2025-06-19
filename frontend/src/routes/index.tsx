@@ -1,10 +1,27 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Table, TableHeader, TableColumn, TableBody, TableRow, TableCell, Pagination, Skeleton, Spinner, Input, Chip, Button, Tooltip } from "@heroui/react";
+import {
+  Table,
+  TableHeader,
+  TableColumn,
+  TableBody,
+  TableRow,
+  TableCell,
+  Pagination,
+  Skeleton,
+  Spinner,
+  Input,
+  Chip,
+  Button,
+  Tooltip,
+  BreadcrumbItem,
+  Breadcrumbs,
+} from "@heroui/react";
 import { useDataStore, useFindAllMeasurement, useUpdatePatienID } from "@/hooks/use-data";
 import { formatShortDateOnly, formatShortTimeOnly } from "@/date/formater";
 import { ArrowRight } from "lucide-react";
 import { useExporter } from "@/hooks/use-exporter";
 import ExportModal from "@/components/export-modal";
+import { pid } from "process";
 export const Route = createFileRoute("/")({
   component: RouteComponent,
 });
@@ -17,6 +34,9 @@ function RouteComponent() {
 
   return (
     <div className="flex flex-col gap-2">
+      <Breadcrumbs>
+        <BreadcrumbItem href="/">ตารางข้อมูลวัดผล</BreadcrumbItem>
+      </Breadcrumbs>
       <div className="flex justify-end">
         <ExportModal />
       </div>

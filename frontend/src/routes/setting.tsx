@@ -3,6 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 
 import PortSelection from "@/components/port-selection";
 import { BreadcrumbItem, Breadcrumbs, Card, CardBody, CardHeader, Listbox, ListboxItem, Skeleton } from "@heroui/react";
+import CustomerInfoCardSetting from "@/components/customer-info-card-setting";
 
 export const Route = createFileRoute("/setting")({
   component: RouteComponent,
@@ -16,6 +17,7 @@ function RouteComponent() {
         <BreadcrumbItem href="/">ตารางข้อมูลวัดผล</BreadcrumbItem>
         <BreadcrumbItem>ตั้งค่าการรับข้อมูล</BreadcrumbItem>
       </Breadcrumbs>
+      <CustomerInfoCardSetting />
       <PortSelection />
       <Card>
         <CardHeader>เครื่องที่เชื่อมต่ออยู่</CardHeader>

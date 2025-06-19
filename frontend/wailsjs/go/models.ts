@@ -1,5 +1,21 @@
 export namespace main {
 	
+	export class Config {
+	    port: string;
+	    name: string;
+	    department: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new Config(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.port = source["port"];
+	        this.name = source["name"];
+	        this.department = source["department"];
+	    }
+	}
 	export class Filter {
 	    limit: number;
 	    page?: number;
