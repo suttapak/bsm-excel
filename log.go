@@ -57,9 +57,9 @@ func NewAppLogger(conf *Config) (AppLogger, error) {
 	config.EncoderConfig.EncodeTime = zapcore.ISO8601TimeEncoder
 	config.EncoderConfig.StacktraceKey = ""
 
-	config.OutputPaths = []string{filepath.Join(path, "app.log")}
-
 	if conf.EnableLog {
+		config.OutputPaths = []string{filepath.Join(path, "app.log")}
+
 		config.ErrorOutputPaths = []string{filepath.Join(path, "errs.log")}
 	}
 

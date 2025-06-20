@@ -16,13 +16,13 @@ var assets embed.FS
 func main() {
 	// conf := NewAppConfig()
 	// _ = conf // to avoid unused variable error
-
-	logger, err := NewAppLogger()
+	conf := NewAppConfig()
+	logger, err := NewAppLogger(conf)
 	if err != nil {
 		log.Fatal(err)
 	}
-	conf := NewAppConfig()
 	logger.Debug("initial config success")
+
 	// Create an instance of the app structure
 	measurement, err := NewMeasurement(logger)
 	if err != nil {
