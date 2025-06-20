@@ -90,6 +90,10 @@ func (e *Exporter) ExportPatientToExcel(patientId string) error {
 
 	}
 	defer f.Close()
+	// remove sheet
+	if err := f.DeleteSheet("Result"); err != nil {
+		e.logger.Error(err)
+	}
 	rowStart := 10
 	f.SetCellValue("Result (2)", fmt.Sprintf("C%d", 5), e.conf.Name)
 	f.SetCellValue("Result (2)", fmt.Sprintf("C%d", 6), e.conf.Department)
@@ -163,6 +167,10 @@ func (e *Exporter) ExportToExcel(date string) error {
 
 	}
 	defer f.Close()
+	// remove sheet
+	if err := f.DeleteSheet("Result (2)"); err != nil {
+		e.logger.Error(err)
+	}
 	f.SetCellValue("Result", fmt.Sprintf("C%d", 3), e.conf.Name)
 	f.SetCellValue("Result", fmt.Sprintf("C%d", 4), e.conf.Department)
 	f.SetCellValue("Result", fmt.Sprintf("C%d", 5), condition.UTC().Format(time.DateOnly))
