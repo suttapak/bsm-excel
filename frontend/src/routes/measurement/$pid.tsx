@@ -118,13 +118,13 @@ function RouteComponent() {
                 <Input defaultValue={item.patient_id} />
               </TableCell>
               <TableCell>
-                <Chip>{item.weight}</Chip>
+                <Chip>{item.weight.toFixed(2)}</Chip>
               </TableCell>
               <TableCell>
-                <Chip>{item.height}</Chip>
+                <Chip>{item.height.toFixed(2)}</Chip>
               </TableCell>
               <TableCell>
-                <Chip>{item.bmi}</Chip>
+                <Chip>{item.bmi.toFixed(2)}</Chip>
               </TableCell>
               <TableCell>
                 <Tooltip content={`ดูเพิ่มเติมสำหรับหมายเลขประจำตัว [${item.patient_id}]`}>

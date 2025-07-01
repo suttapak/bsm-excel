@@ -111,7 +111,7 @@ func (a *App) startup(ctx context.Context, conf *Config) {
 			msg := strings.Split(string(message), string(rune(0x1B)))
 
 			if len(msg) != 5 {
-				a.logger.Error("message splinting with 0x1B lessthan 5")
+				a.logger.Error("message splinting with 0x1B less than 5")
 				return
 			}
 			var dataPipe []string = strings.Split(msg[4], string(rune(0x1A)))

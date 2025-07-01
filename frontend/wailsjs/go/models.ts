@@ -4,6 +4,7 @@ export namespace main {
 	    port: string;
 	    name: string;
 	    department: string;
+	    enable_log: boolean;
 	
 	    static createFrom(source: any = {}) {
 	        return new Config(source);
@@ -14,6 +15,7 @@ export namespace main {
 	        this.port = source["port"];
 	        this.name = source["name"];
 	        this.department = source["department"];
+	        this.enable_log = source["enable_log"];
 	    }
 	}
 	export class Filter {

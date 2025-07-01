@@ -93,13 +93,26 @@ function RouteComponent() {
                 />
               </TableCell>
               <TableCell>
-                <Chip>{item.weight}</Chip>
+                <Chip>
+                  {Intl.NumberFormat("th-TH", {
+                    style: "unit",
+                    unit: "kilogram",
+                    minimumFractionDigits: 2,
+                  }).format(item.weight)}{" "}
+                </Chip>
               </TableCell>
               <TableCell>
-                <Chip>{item.height}</Chip>
+                <Chip>
+                  {Intl.NumberFormat("th-TH", {
+                    style: "unit",
+                    unit: "centimeter",
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  }).format(item.height)}
+                </Chip>
               </TableCell>
               <TableCell>
-                <Chip>{item.bmi}</Chip>
+                <Chip>{item.bmi.toFixed(2)}</Chip>
               </TableCell>
               <TableCell>
                 <Tooltip content={`ดูเพิ่มเติมสำหรับหมายเลขประจำตัว [${item.patient_id}]`}>

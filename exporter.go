@@ -111,9 +111,9 @@ func (e *Exporter) ExportPatientToExcel(patientId string) error {
 		f.SetCellValue("Result (2)", fmt.Sprintf("B%d", rowStart), measurement.CreatedAt.Format(time.DateOnly))
 		f.SetCellValue("Result (2)", fmt.Sprintf("C%d", rowStart), measurement.CreatedAt.Format(time.TimeOnly))
 		f.SetCellValue("Result (2)", fmt.Sprintf("D%d", rowStart), measurement.PatientID)
-		f.SetCellValue("Result (2)", fmt.Sprintf("E%d", rowStart), measurement.Weight)
-		f.SetCellValue("Result (2)", fmt.Sprintf("F%d", rowStart), measurement.Height)
-		f.SetCellValue("Result (2)", fmt.Sprintf("G%d", rowStart), measurement.BMI)
+		f.SetCellValue("Result (2)", fmt.Sprintf("E%d", rowStart), fmt.Sprintf("%.2f", measurement.Weight))
+		f.SetCellValue("Result (2)", fmt.Sprintf("F%d", rowStart), fmt.Sprintf("%.2f", measurement.Height))
+		f.SetCellValue("Result (2)", fmt.Sprintf("G%d", rowStart), fmt.Sprintf("%.2f", measurement.BMI))
 		rowStart++
 	}
 	option := runtime.SaveDialogOptions{
@@ -180,9 +180,9 @@ func (e *Exporter) ExportToExcel(date string) error {
 		f.SetCellValue("Result", fmt.Sprintf("B%d", rowStart), measurement.CreatedAt.Format(time.DateOnly))
 		f.SetCellValue("Result", fmt.Sprintf("C%d", rowStart), measurement.CreatedAt.Format(time.TimeOnly))
 		f.SetCellValue("Result", fmt.Sprintf("D%d", rowStart), measurement.PatientID)
-		f.SetCellValue("Result", fmt.Sprintf("E%d", rowStart), measurement.Weight)
-		f.SetCellValue("Result", fmt.Sprintf("F%d", rowStart), measurement.Height)
-		f.SetCellValue("Result", fmt.Sprintf("G%d", rowStart), measurement.BMI)
+		f.SetCellValue("Result", fmt.Sprintf("E%d", rowStart), fmt.Sprintf("%.2f", measurement.Weight))
+		f.SetCellValue("Result", fmt.Sprintf("F%d", rowStart), fmt.Sprintf("%.2f", measurement.Height))
+		f.SetCellValue("Result", fmt.Sprintf("G%d", rowStart), fmt.Sprintf("%.2f", measurement.BMI))
 		rowStart++
 	}
 	option := runtime.SaveDialogOptions{
